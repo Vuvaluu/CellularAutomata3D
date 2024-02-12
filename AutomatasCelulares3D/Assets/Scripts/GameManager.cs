@@ -12,64 +12,79 @@ public class GameManager : MonoBehaviour
     [SerializeField] int y; 
     [SerializeField] int z;
     [SerializeField] int ite;
+    [SerializeField] int survival;
+    [SerializeField] int birth;
     [SerializeField] GameObject blankCell;
     [SerializeField] GameObject fullCell;
     [SerializeField] Button generateButton;
     [SerializeField] TMP_InputField sizeX_IF;
     [SerializeField] TMP_InputField sizeY_IF;
     [SerializeField] TMP_InputField sizeZ_IF;
-    [SerializeField] TMP_InputField iteNumber_IF;
-    [SerializeField] Toggle steppedToggle;
+    [SerializeField] TMP_InputField survival_IF;
+    [SerializeField] TMP_InputField birth_IF;
+    [SerializeField] Toggle mvnTooggle;
 
     int iteCount = 0;
     int[, ,] cells;
-    bool stepped;
     bool generate;
+    bool moore_vonNewman;
 
     void Start()
     {
-        CreateCells();
         generate = false;
     } 
 
-    /*void Update()
+    void Update()
     {
          //Condicion para que se cree el automata celular.
          //Ite se usa para generar n veces las generaciones.
-        if(generate == true && iteCount < ite) {
-            iteCount ++;
-            int[,] nextCells = new int [rows, cols];
+         if(generate == true) {
+            
+            int[, ,] nextCells = new int [x, y, z];
             //Se itera sobre todas las celdas para checar sus vecindarios(si en el vecindario de
             // la celda i hay mas de 5 unos, en la sig generacion la celda i va a valer 1).
-            for (int j = 0; j < rows; j++)
+            for (int k = 0; k < z; k++)
             {
-                for (int i = 0; i < cols; i++)
+                for (int j = 0; j < y; j++)
                 {
-                    int num = numOfFilledCells(i, j);
-                    if(num >= 5)
+                    for (int i = 0; i < x; i++)
                     {
-                        nextCells[i, j] = 1;
-                    }else{
-                        nextCells[i, j] = 0;
+                        int num = numOfFilledCells(i, j, k);
+                       if(cells[i, j, k] == 0 ){
+                        if(num >= birth){
+                            cells[i, j, k] = 1;
+                        }
+                        } else if(cells[i, j, k] == 1){
+                            if(num >= survival) {
+                                cells[i, j, k] = 1;
+                            } else {
+                                cells[i, j, k] = 0;
+                            }
+                        }
                     }
+
                 }
             }
             cells = nextCells;
             //Se itera sobre todas las generaciones para saber si ponerle blanck o full.
-            for (int i = 0; i < cols; i++)
+            for (int i = 0; i < x; i++)
             {
-                for (int j = 0; j < rows; j++)
+                for (int j = 0; j < y; j++)
                 {
-                    if(IsFilled(i, j) == 0){
-                        Instantiate(blankCell, new Vector2(i, j), Quaternion.identity);
-                    } else if (IsFilled(i, j) == 1)
+                    for (int k = 0; k < z; k++)
                     {
-                        Instantiate(fullCell, new Vector2(i, j), Quaternion.identity);
+                        /*if(IsFilled(i, j, k) == 0){
+                            Instantiate(blankCell, new Vector2(i, j, k), Quaternion.identity);
+                        } else if (IsFilled(i, j, k) == 1)
+                        {
+                            Instantiate(fullCell, new Vector2(i, j, k), Quaternion.identity);
+                        }*/
                     }
+
                 }
             }
-        }   
-    } */
+        }  
+    } 
      
    //Se crea una grid random de 1 y 0.
     void CreateCells(){
@@ -92,38 +107,43 @@ public class GameManager : MonoBehaviour
     }
 
     //Te regresa el numero de unos que hay en i.
-   /*  int numOfFilledCells(int x, int y){
+     int numOfFilledCells(int _x, int _y, int _z){
         int num = 0;
         for (int i = -1; i <= 1; i++)
         {
-            for (int j = -1; j <= 1; j++)
+            for(int j = -1; j <= 1; j++)
             {
-                if(IsFilled(x + i, y + j) == 1){
-                    num++;
-                }
+                for (int k = -1; k <= 1; k++)
+            {
+                //if(IsFilled(_x + i, _y + j, _z + k) == 1){
+                   // num++;
+                //}
             }
+            } 
         }
         return num;
     }
 
     //Toma los valores de la UI y los guarda en variables.
     public void GenerateCA(){
-    rows = int.Parse(sizeX_IF.text);
-    cols = int.Parse(sizeY_IF.text);
-    stepped = steppedToggle.isOn;
-    ite = int.Parse(iteNumber_IF.text);
+    x = int.Parse(sizeX_IF.text);
+    y = int.Parse(sizeY_IF.text);
+    z = int.Parse(sizeZ_IF.text);
+    survival = int.Parse(survival_IF.text);
+    birth = int.Parse(birth_IF.text);
+    moore_vonNewman = mvnTooggle.isOn;
     generate = true;
-    cells = new int[rows, cols];
+    cells = new int[x, y, z];
     CreateCells();
     }
 
     //Devuelve si una celda esta llena o no.
-    public int IsFilled(int x, int y){
-    if (x < 0 || x >= cols || y < 0 || y >= rows) {
-        return 0;
-    } else { 
+    //public int IsFilled(int x, int y){
+   // if (x < 0 || x >= cols || y < 0 || y >= rows) {
+      //  return 0;
+  //  } else { 
        // Debug.Log(x + ", " + y + " =" + cells[x, y]);
-        return cells[x, y];
-    }
-    }*/
+     //   return cells[x, y];
+  //  }
+   // }
 }
