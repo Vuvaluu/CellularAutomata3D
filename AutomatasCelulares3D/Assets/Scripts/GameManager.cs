@@ -43,12 +43,11 @@ public class GameManager : MonoBehaviour
             timer += Time.deltaTime;
         }
          //Condicion para que se cree el automata celular.
-         //Ite se usa para generar n veces las generaciones.
          if(generate == true && timerReached == false && timer > 1) {
             timer = 0;
             int[, ,] nextCells = new int [x, y, z];
-            //Se itera sobre todas las celdas para checar sus vecindarios(si en el vecindario de
-            // la celda i hay mas de 5 unos, en la sig generacion la celda i va a valer 1).
+            /*Se itera sobre todas las celdas para checar sus vecindarios(Dependiendo
+            de el estado de la celda se compara con survival o birth).*/
             for (int k = 0; k < z; k++)
             {
                 for (int j = 0; j < y; j++)
@@ -57,12 +56,16 @@ public class GameManager : MonoBehaviour
                     {
                         //Debug.Log(i + ", " + j + ", " + k + " =" + cells[i, j, k]);
                         int num = numOfFilledCells(i, j, k);
+                        /*Si la celda tiene un estado de 0, se checara el numero de 1s
+                         q tiene alrededor para saber si puede revivir en la sig generacion.*/
                        if(IsFilled(i, j, k) == 0 ){
                         if(num >= birth){
                             Debug.Log("birth");
                             Debug.Log("num" + num);
                             nextCells[i, j, k] = 1;
                         }
+                        /* Si la celda tiene un estado de 1, se checara el numero de 1s 
+                            que tiene alrededor para saber si sobrevivi o muere en la sig generacion.*/
                         } else if(IsFilled(i, j, k) == 1){
                             if(num >= survival) {
                                 Debug.Log("num" + num);
@@ -76,7 +79,9 @@ public class GameManager : MonoBehaviour
 
                 }
             }
+            //Actualiza las celdas actuales con la sig. generacion
             cells = nextCells;
+            //Todos los gameObjects que teniamos, se borran y se ,limpia la lista.
             foreach (GameObject cell in currentCells)
             {
                 Destroy(cell);
@@ -122,7 +127,7 @@ public class GameManager : MonoBehaviour
         } 
     }
 
-    //Te regresa el numero de unos que hay en i.
+    //Te regresa el numero de 1s que hay en i dependiendo del vecindario que seleccione el usuario.
      int numOfFilledCells(int _x, int _y, int _z){
         int num = 0;
         if (moore_vonNewman == true)
@@ -161,10 +166,10 @@ public class GameManager : MonoBehaviour
 
     //Devuelve si una celda esta llena o no.
     public int IsFilled(int _x, int _y, int _z){
+        //Se checa si es una esquina o borde para regresar 0.
         if (_x < 0 || _x >= x || _y < 0 || _y >= y || _z < 0 || _z >= z) {
         return 0;
      } else { 
-        //Debug.Log(_x + ", " + _y + ", " + _z + " =" + cells[_x, _y, _z]);
         return cells[_x, _y, _z];
      }
     }
