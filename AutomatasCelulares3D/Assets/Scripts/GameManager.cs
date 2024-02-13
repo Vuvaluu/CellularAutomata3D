@@ -23,23 +23,29 @@ public class GameManager : MonoBehaviour
     [SerializeField] TMP_InputField survival_IF;
     [SerializeField] TMP_InputField birth_IF;
     [SerializeField] Toggle mvnTooggle;
-
-    int iteCount = 0;
+    List<GameObject> currentCells = new List<GameObject>();
     int[, ,] cells;
+    float timer;
     bool generate;
     bool moore_vonNewman;
+    bool timerReached;
 
     void Start()
     {
         generate = false;
+        timerReached = false;
+        timer = 0;
     } 
 
     void Update()
     {
+        if(timerReached == false){
+            timer += Time.deltaTime;
+        }
          //Condicion para que se cree el automata celular.
          //Ite se usa para generar n veces las generaciones.
-         if(generate == true) {
-            
+         if(generate == true && timerReached == false && timer > 1) {
+            timer = 0;
             int[, ,] nextCells = new int [x, y, z];
             //Se itera sobre todas las celdas para checar sus vecindarios(si en el vecindario de
             // la celda i hay mas de 5 unos, en la sig generacion la celda i va a valer 1).
@@ -49,16 +55,21 @@ public class GameManager : MonoBehaviour
                 {
                     for (int i = 0; i < x; i++)
                     {
+                        //Debug.Log(i + ", " + j + ", " + k + " =" + cells[i, j, k]);
                         int num = numOfFilledCells(i, j, k);
-                       if(cells[i, j, k] == 0 ){
+                       if(IsFilled(i, j, k) == 0 ){
                         if(num >= birth){
-                            cells[i, j, k] = 1;
+                            Debug.Log("birth");
+                            Debug.Log("num" + num);
+                            nextCells[i, j, k] = 1;
                         }
-                        } else if(cells[i, j, k] == 1){
+                        } else if(IsFilled(i, j, k) == 1){
                             if(num >= survival) {
-                                cells[i, j, k] = 1;
+                                Debug.Log("num" + num);
+                                nextCells[i, j, k] = 1;
                             } else {
-                                cells[i, j, k] = 0;
+                                Debug.Log("dead");
+                                nextCells[i, j, k] = 0;
                             }
                         }
                     }
@@ -66,6 +77,11 @@ public class GameManager : MonoBehaviour
                 }
             }
             cells = nextCells;
+            foreach (GameObject cell in currentCells)
+            {
+                Destroy(cell);
+            }
+            currentCells.Clear();
             //Se itera sobre todas las generaciones para saber si ponerle blanck o full.
             for (int i = 0; i < x; i++)
             {
@@ -73,12 +89,12 @@ public class GameManager : MonoBehaviour
                 {
                     for (int k = 0; k < z; k++)
                     {
-                        /*if(IsFilled(i, j, k) == 0){
-                            Instantiate(blankCell, new Vector2(i, j, k), Quaternion.identity);
+                        if(IsFilled(i, j, k) == 0){
+                            currentCells.Add(Instantiate(blankCell, new Vector3(i, j, k), Quaternion.identity));
                         } else if (IsFilled(i, j, k) == 1)
                         {
-                            Instantiate(fullCell, new Vector2(i, j, k), Quaternion.identity);
-                        }*/
+                            currentCells.Add(Instantiate(fullCell, new Vector3(i, j, k), Quaternion.identity));
+                        }
                     }
 
                 }
@@ -96,10 +112,10 @@ public class GameManager : MonoBehaviour
                 for (int k = 0; k < z; k++) {
                 cells[i, j, k] = Random.Range(0,2);
                  if(cells[i, j, k] == 0) {
-                Instantiate(blankCell, new Vector3(i, j, k), Quaternion.identity);
+                currentCells.Add(Instantiate(blankCell, new Vector3(i, j, k), Quaternion.identity));
                 } else if (cells[i, j, k] == 1)
                 {
-                    Instantiate(fullCell, new Vector3(i, j, k), Quaternion.identity);
+                    currentCells.Add(Instantiate(fullCell, new Vector3(i, j, k), Quaternion.identity));
                 } 
                 } 
             }
@@ -109,17 +125,23 @@ public class GameManager : MonoBehaviour
     //Te regresa el numero de unos que hay en i.
      int numOfFilledCells(int _x, int _y, int _z){
         int num = 0;
-        for (int i = -1; i <= 1; i++)
+        if (moore_vonNewman == true)
+        {
+            //Moore 
+            for (int i = -1; i <= 1; i++)
         {
             for(int j = -1; j <= 1; j++)
             {
                 for (int k = -1; k <= 1; k++)
             {
-                //if(IsFilled(_x + i, _y + j, _z + k) == 1){
-                   // num++;
-                //}
+               if(IsFilled(_x + i, _y + j, _z + k) == 1){
+                    num++;
+                }
             }
             } 
+        }
+        }else{
+            //VonNewman
         }
         return num;
     }
@@ -138,12 +160,12 @@ public class GameManager : MonoBehaviour
     }
 
     //Devuelve si una celda esta llena o no.
-    //public int IsFilled(int x, int y){
-   // if (x < 0 || x >= cols || y < 0 || y >= rows) {
-      //  return 0;
-  //  } else { 
-       // Debug.Log(x + ", " + y + " =" + cells[x, y]);
-     //   return cells[x, y];
-  //  }
-   // }
+    public int IsFilled(int _x, int _y, int _z){
+        if (_x < 0 || _x >= x || _y < 0 || _y >= y || _z < 0 || _z >= z) {
+        return 0;
+     } else { 
+        //Debug.Log(_x + ", " + _y + ", " + _z + " =" + cells[_x, _y, _z]);
+        return cells[_x, _y, _z];
+     }
+    }
 }
