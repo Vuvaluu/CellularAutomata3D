@@ -29,8 +29,9 @@ public class GameManager : MonoBehaviour
     bool generate;
     bool moore_vonNewman;
     bool timerReached;
+    int genToDie = 3;
 
-    void Start()
+     void Start()
     {
         generate = false;
         timerReached = false;
@@ -61,18 +62,18 @@ public class GameManager : MonoBehaviour
                        if(IsFilled(i, j, k) == 0 ){
                         if(num >= birth){
                             Debug.Log("birth");
-                            Debug.Log("num" + num);
-                            nextCells[i, j, k] = 1;
+                            nextCells[i, j, k] = genToDie;
                         }
                         /* Si la celda tiene un estado de 1, se checara el numero de 1s 
                             que tiene alrededor para saber si sobrevivi o muere en la sig generacion.*/
-                        } else if(IsFilled(i, j, k) == 1){
+                        } else {
                             if(num >= survival) {
-                                Debug.Log("num" + num);
-                                nextCells[i, j, k] = 1;
+                                //nextCells[i, j, k] = 3;
                             } else {
                                 Debug.Log("dead");
-                                nextCells[i, j, k] = 0;
+                                if (nextCells[i, j, k] >= 1) {
+                                    nextCells[i, j, k] = nextCells[i, j, k] - 1;
+                                }
                             }
                         }
                     }
@@ -96,8 +97,7 @@ public class GameManager : MonoBehaviour
                     {
                         if(IsFilled(i, j, k) == 0){
                             currentCells.Add(Instantiate(blankCell, new Vector3(i, j, k), Quaternion.identity));
-                        } else if (IsFilled(i, j, k) == 1)
-                        {
+                        } else {
                             currentCells.Add(Instantiate(fullCell, new Vector3(i, j, k), Quaternion.identity));
                         }
                     }
@@ -110,18 +110,18 @@ public class GameManager : MonoBehaviour
    //Se crea una grid random de 1 y 0.
     void CreateCells(){
         cells = new int [x, y, z];
+        int [] randomNumber = {0, genToDie};
         for (int j = 0; j < x; j++)
         {
             for (int i = 0; i < y; i++)
             {
                 for (int k = 0; k < z; k++) {
-                cells[i, j, k] = Random.Range(0,2);
-                 if(cells[i, j, k] == 0) {
-                currentCells.Add(Instantiate(blankCell, new Vector3(i, j, k), Quaternion.identity));
-                } else if (cells[i, j, k] == 1)
-                {
-                    currentCells.Add(Instantiate(fullCell, new Vector3(i, j, k), Quaternion.identity));
-                } 
+                    cells[i, j, k] = randomNumber[Random.Range(0, 2)];
+                    if(cells[i, j, k] == 0) {
+                        currentCells.Add(Instantiate(blankCell, new Vector3(i, j, k), Quaternion.identity));
+                    } else {
+                        currentCells.Add(Instantiate(fullCell, new Vector3(i, j, k), Quaternion.identity));
+                    } 
                 } 
             }
         } 
@@ -134,34 +134,32 @@ public class GameManager : MonoBehaviour
         {
             //Moore 
             for (int i = -1; i <= 1; i++)
-        {
+            {
             for(int j = -1; j <= 1; j++)
             {
                 for (int k = -1; k <= 1; k++)
             {
-               if(IsFilled(_x + i, _y + j, _z + k) == 1){
+               if(IsFilled(_x + i, _y + j, _z + k) != 0){
                     num++;
                 }
             }
             } 
-        }
-        }else{
-            //VonNewman
+            }
         }
         return num;
     }
 
     //Toma los valores de la UI y los guarda en variables.
     public void GenerateCA(){
-    x = int.Parse(sizeX_IF.text);
-    y = int.Parse(sizeY_IF.text);
-    z = int.Parse(sizeZ_IF.text);
-    survival = int.Parse(survival_IF.text);
-    birth = int.Parse(birth_IF.text);
-    moore_vonNewman = mvnTooggle.isOn;
-    generate = true;
-    cells = new int[x, y, z];
-    CreateCells();
+        x = int.Parse(sizeX_IF.text);
+        y = int.Parse(sizeY_IF.text);
+        z = int.Parse(sizeZ_IF.text);
+        survival = int.Parse(survival_IF.text);
+        birth = int.Parse(birth_IF.text);
+        moore_vonNewman = mvnTooggle.isOn;
+        generate = true;
+        cells = new int[x, y, z];
+        CreateCells();
     }
 
     //Devuelve si una celda esta llena o no.
